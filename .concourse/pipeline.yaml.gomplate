@@ -518,10 +518,13 @@ jobs:
               export GKE_PROJECT={{ if has . "gke_project" }}{{ .gke_project }}{{ else }}"suse-225215"{{ end }}
               export GKE_CLUSTER_ZONE={{ if has . "gke_zone" }}{{ .gke_zone }}{{ else }}"europe-west3-c"{{ end }}
               export GKE_CLUSTER_NAME="kubecf-ci-${BRANCH}-${CFSCHEDULER}-$(cat semver.gke-cluster/version | sed 's/\./-/g')"
-              # Obtain pvc disks associated to the cluster
+
+              # Obtain pvc disks that are not used
+              # https://groups.google.com/d/msg/gce-discussion/RLrwOx8fazo/9ve7lIdsBQAJ
               IDS=$(gcloud compute disks list \
                     --filter="zone~${GKE_CLUSTER_ZONE}" \
-                    --filter="name~${GKE_CLUSTER_NAME} AND name~pvc" \
+                    --filter="name~pvc" \
+                    --filter="-users:*"
                     --format="value(id)" \
                     --project=${GKE_PROJECT})
               # Delete cluster
